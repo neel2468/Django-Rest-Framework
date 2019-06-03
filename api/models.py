@@ -9,6 +9,7 @@ class Category(models.Model):
 
 class Application(models.Model):
     name  = models.CharField(max_length=20)
+    descrition = models.TextField()
     category = models.ForeignKey('Category', related_name='category', on_delete=models.CASCADE)
 
 

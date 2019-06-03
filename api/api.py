@@ -64,3 +64,53 @@ class GetApplicationByCategoryId(generics.RetrieveAPIView):
 #    def get(self,request,id):
 #        application = Application.objects.filter(category=id)
 #        return Response(ApplicationSerializer(application,many=True).data)     
+
+
+class CreateCategory(generics.CreateAPIView):
+    serializer_class = CategorySerializer
+    def post(self,request,*args,**kwargs):
+        new_category = Category.objects.create(
+            name = request.data['name']
+        )
+        return Response(
+            data = CategorySerializer(new_category).data
+        )
+
+class CreateApplication(generics.CreateAPIView):
+    serializer_class = ApplicationSerializer
+
+    def post(self,request,*args,**kwargs):
+        new_application = Application.objects.create(
+            name = request.data['name'],
+            category = Category.objects.get(id=kwargs['id'])
+        )
+        return Response(
+            data = ApplicationSerializer(new_application).data
+        )
+
+class UpdateApplicationById(generics.UpdateAPIView):
+    queryset = Application.objects.all()
+    serializer_class = ApplicationSerializer
+
+    def put(self,request,*args,**kwargs):
+        get_application = self.queryset.get(id=kwargs['id'])
+        serializer = ApplicationSerializer()
+        category = Category.objects.get(id=request.data['category'])
+        data = {
+            'name':request.data['name'],
+            'descrition':request.data['descrition'],
+            'category':category
+        }
+        updated_application = serializer.update(get_application,data)
+        return Response(ApplicationSerializer(updated_application).data)
+
+class DeleteApplicationById(generics.DestroyAPIView):
+    queryset = Application.objects.all()
+    serializer_class = ApplicationSerializer
+
+    def delete(self,request,*args,**kwargs):
+        delete_application = self.queryset.get(id=kwargs['id'])
+        delete_application.delete()
+        return Response(data = {
+            'message' : 'Application deleted!'
+        })
